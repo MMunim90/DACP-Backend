@@ -34,7 +34,9 @@ class BookUpdate(BaseModel):
 
 class UpdateUserRole(BaseModel):
     role : str
-    
+        
+class UpdateUserStatus(BaseModel):
+    is_active : bool
 class IssueBook(BaseModel):
     book_id: int
     user_id: int
@@ -76,6 +78,12 @@ def update_user(user : user_dependency, db : db_dependency, user_id: int, update
             raise HTTPException(status_code=401, detail='Failed Authentication')
 
     user = db.query(Users).filter(Users.id == user_id).first()
+    
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     update_role = update_user_role.model_dump(exclude_unset=True)
 
@@ -83,6 +91,28 @@ def update_user(user : user_dependency, db : db_dependency, user_id: int, update
 
     db.commit()
     return JSONResponse(status_code=200, content={'message' : 'User role updated successfully'})
+
+
+@router.put('/admin/update_user_status')
+def update_user(user : user_dependency, db : db_dependency, user_id: int, update_user_status : UpdateUserStatus):
+
+    if user is None or user.get('role') != 'admin':
+            raise HTTPException(status_code=401, detail='Failed Authentication')
+
+    user = db.query(Users).filter(Users.id == user_id).first()
+    
+    if user is None:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+
+    update_status = update_user_status.model_dump(exclude_unset=True)
+
+    user.is_active = update_user_status.is_active
+
+    db.commit()
+    return JSONResponse(status_code=200, content={'message' : 'User status updated successfully'})
 
 
 @router.delete('/admin/remove_user/{user_id}')
