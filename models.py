@@ -34,6 +34,18 @@ class Contests(Base):
     start_at = Column(DateTime, nullable=False)
     end_at = Column(DateTime, nullable=False)
     
+    
+class Challenges(Base):
+    
+    __tablename__ = 'challenges'
+    
+    id = Column(Integer, primary_key = True, index = True)
+    title = Column(String, nullable=False)
+    writers = Column(String, nullable=True)
+    category = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    difficulty = Column(String(20), nullable=False, default="beginner") # beginner or intermediate or advance 
+    created_at = Column(DateTime, default = datetime.now)
 
 class Books(Base):
     
