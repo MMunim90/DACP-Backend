@@ -6,7 +6,7 @@ DACP is a platform designed to help developers practice coding challenges, parti
 
 This repository contains the backend services, RESTful APIs, database models, and authentication system that power the DACP platform.
 
-- Frontend: [Developer Assessment and Coding Platform]\([https://github.com/MMunim90/Developer-Assessment-and-Coding-Platform](https://github.com/MMunim90/Developer-Assessment-and-Coding-Platform))
+- Frontend: [Developer Assessment and Coding Platform](https://github.com/MMunim90/Developer-Assessment-and-Coding-Platform)
 
 ## 🚀 Tech Stack
 
