@@ -1,81 +1,117 @@
-# Library Management System
+# Developer Assessment and Coding Platform (DACP) — Backend
 
-A full-stack web application built with React, FastAPI, and Supabase PostgreSQL.
+A backend application built with **Python, FastAPI, SQLAlchemy, and Supabase PostgreSQL** for the Developer Assessment and Coding Platform (DACP).
 
-- Frontend: [LibraryHub - Library-Management-System](https://github.com/MMunim90/FastAPI-Fullstack-Project-Frontend)
+DACP is a platform designed to help developers practice coding challenges, participate in programming contests, complete technical assessments, and track their problem-solving progress.
+
+This repository contains the backend services, RESTful APIs, database models, and authentication system that power the DACP platform.
+
+- Frontend: [Developer Assessment and Coding Platform]\([https://github.com/MMunim90/Developer-Assessment-and-Coding-Platform](https://github.com/MMunim90/Developer-Assessment-and-Coding-Platform))
 
 ## 🚀 Tech Stack
-
-### Frontend
-- React
-- JavaScript
-- HTML5 & CSS3
-- Tailwind CSS
-- Daisy UI
 
 ### Backend
 - Python
 - FastAPI
 - Pydantic
-- SQLAlchemy 
+- SQLAlchemy
+- RESTful API
 
 ### Database
 - Supabase
 - PostgreSQL
 
+### Authentication & Security
+- JWT Authentication
+- Password Hashing
+- Role-Based Access Control
+- Environment Variable Configuration
+
 ### Tools
 - Git & GitHub
 - VS Code
 - Postman
+- Swagger UI
 
 ## ✨ Features
 
-- Responsive and user-friendly interface
-- RESTful API development with FastAPI
+- RESTful API development using FastAPI
+- User registration and authentication
+- JWT-based authentication and authorization
+- Role-based access control
+- User profile management
+- Coding challenge management
+- Programming contest management
+- Technical assessment management
+- Code submission management
+- Submission evaluation and result tracking
+- Leaderboard and developer progress tracking
 - PostgreSQL database integration using Supabase
-- Data validation with Pydantic
+- Data validation using Pydantic
+- Database operations using SQLAlchemy
 - CRUD operations (Create, Read, Update, Delete)
-- Frontend and backend separation
+- Separation of backend services and frontend application
+
+*Note: Keep only the features that are implemented in your current backend. Mark unfinished features as planned.*
 
 ## 🏗️ Architecture
 
 ```text
-React Frontend
-      |
-      | HTTP Requests (REST API)
-      v
-FastAPI Backend
-      |
-      | Database Queries
-      v
-Supabase PostgreSQL
+                 DACP Frontend
+                  (React)
+                      |
+                      |
+              HTTP Requests (REST API)
+                      |
+                      v
+                FastAPI Backend
+                      |
+          ┌───────────┼───────────┐
+          |           |           |
+          v           v           v
+       Routers     Services    Authentication
+          |           |           |
+          └───────────┼───────────┘
+                      |
+                      v
+                SQLAlchemy ORM
+                      |
+                      |
+                      v
+              Supabase PostgreSQL
+                      |
+          ┌───────────┼───────────┐
+          |           |           |
+          v           v           v
+        Users     Challenges   Submissions
+                      |
+               Contests & Assessments
 ```
 
 ## 📁 Project Structure
 
 ```text
-FastAPI-Fullstack-Project/
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   └── package.json
+DACP---Backend/
 │
-├── backend/
-│    ├── router/
-│    ├── .env
-│    ├── .gitignore
-│    ├── database.py
-│    ├── main.py
-│    ├── models.py
-│    └── requirements.txt
+├── router/
+│   ├── user.py
+│   ├── admin.py
+│   ├── challenge.py
+│   ├── contest.py
+│   └── assessment.py
+│
+├── .env
+├── .gitignore
+├── database.py
+├── main.py
+├── models.py
+├── schemas.py
+├── requirements.txt
 │
 └── README.md
 ```
+
+*The structure above is a suggested example. Adjust the folders and filenames to match your actual backend project.*
 
 ## ⚙️ Installation and Setup
 
@@ -83,139 +119,146 @@ FastAPI-Fullstack-Project/
 
 Make sure you have installed:
 
-- Node.js and npm
 - Python 3.10+
+- pip
 - A Supabase account
 - Git
+- VS Code or another code editor
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/MMunim90/FastAPI-Fullstack-Project.git
-cd FastAPI-Fullstack-Project
+git clone <your-dacp-backend-repository-url>
+cd DACP---Backend
 ```
 
-### 2. Set Up the Backend
+### 2. Create a Virtual Environment
 
 ```bash
-cd backend
 python -m venv venv
 ```
 
 Activate the virtual environment.
 
-Windows:
+**Windows:**
 
 ```bash
 venv\Scripts\activate
 ```
 
-Linux/macOS:
+**Linux/macOS:**
 
 ```bash
 source venv/bin/activate
 ```
 
-Install dependencies:
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Create a `.env` file and configure your database connection:
+### 4. Configure Environment Variables
+
+Create a `.env` file in the backend root directory.
 
 ```env
 DATABASE_URL=your_supabase_postgresql_connection_string
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-Start the FastAPI server:
+Replace the placeholder values with your actual configuration.
+
+Never expose your database credentials or secret keys publicly.
+
+### 5. Run the Backend Server
 
 ```bash
 uvicorn main:app --reload
 ```
 
-The backend will run at:
+The backend server will run at:
 
-`http://127.0.0.1:8000`
-
-Interactive API documentation:
-
-`http://127.0.0.1:8000/docs`
-
-### 3. Set Up the Frontend
-
-Open a new terminal:
-
-```bash
-cd frontend
-npm install
+```text
+http://127.0.0.1:8000
 ```
-
-Configure your frontend environment variables if required.
-
-Create a `.env` file:
-
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
-
-Start the React development server:
-
-```bash
-npm run dev
-```
-
-Open the local URL displayed in your terminal.
 
 ## 🗄️ Database Setup
 
+DACP uses **Supabase PostgreSQL** as its database.
+
+Follow these steps:
+
 1. Create a project in [Supabase](https://supabase.com/).
-2. Set up your PostgreSQL database tables.
-3. Copy the appropriate database connection string from your Supabase project.
-4. Add the connection string to the backend `.env` file.
-5. Ensure your database credentials are kept private.
+2. Set up the required PostgreSQL database.
+3. Copy your PostgreSQL connection string.
+4. Add the connection string to your backend `.env` file.
+5. Configure SQLAlchemy to connect to the database.
+6. Ensure your database credentials remain private.
 
 ## 🔐 Environment Variables
 
-Never commit secret keys, passwords, or database credentials to GitHub.
+Never commit sensitive information such as:
 
-Add the following to `.gitignore`:
+- Database connection strings
+- JWT secret keys
+- Passwords
+- API keys
+- Private credentials
+
+Add the following entries to your `.gitignore` file:
 
 ```gitignore
 .env
 venv/
 __pycache__/
-node_modules/
-dist/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
 ```
 
-## 📖 API Documentation
+## 📡 API Documentation
 
 FastAPI automatically generates interactive API documentation.
 
-- Swagger UI: `/docs`
-- ReDoc: `/redoc`
+After starting the backend server, access:
+
+| Documentation | URL |
+|---|---|
+| Swagger UI | http://127.0.0.1:8000/docs |
+| ReDoc | http://127.0.0.1:8000/redoc |
+
+Use these interfaces to explore, test, and understand the available API endpoints.
 
 ## 🛠️ Development Workflow
 
-1. Build the user interface with React.
-2. Develop API endpoints with FastAPI.
-3. Connect the backend to Supabase PostgreSQL.
-4. Integrate the frontend with the backend API.
-5. Test API endpoints and database operations.
-6. Test the complete application.
+1. Design and create database models using SQLAlchemy.
+2. Define request and response schemas using Pydantic.
+3. Develop API endpoints using FastAPI routers.
+4. Implement authentication and authorization.
+5. Connect the backend to Supabase PostgreSQL.
+6. Integrate the frontend with backend REST APIs.
+7. Test API endpoints using Swagger UI and Postman.
+8. Test database operations and application functionality.
 
 ## 🚧 Project Status
 
-Currently under development.
+**Currently under development.**
+
+The backend is being developed to support the core functionalities of the Developer Assessment and Coding Platform.
 
 ## 👨‍💻 Author
 
 **Munim**
 
 - GitHub: [@MMunim90](https://github.com/MMunim90)
-- LinkedIn: [MD. SHAHAN AL MUNIM](https://www.linkedin.com/in/m-munim)
+- LinkedIn: [MD. Shahan Al Munim](https://www.linkedin.com/in/m-munim)
 
 ## 📄 License
 
-This project is licensed under the MIT License. Add a `LICENSE` file if you intend to distribute it under that license.
+This project is licensed under the MIT License.
+
+Add a `LICENSE` file to the repository if you intend to distribute it under the MIT License.
