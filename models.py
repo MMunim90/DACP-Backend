@@ -17,6 +17,23 @@ class Users(Base):
     role = Column(String) # admin or developer
     phone_number = Column(String)
     
+    
+class Contests(Base):
+    
+    __tablename__ = 'contests'
+    
+    id = Column(Integer, primary_key = True, index = True)
+    title = Column(String, nullable=False)
+    writers = Column(String, nullable=True)
+    category = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    status = Column(String(20), default = "upcoming", nullable=False) # upcoming or running or past
+    length = Column(Float, default=0.0, nullable=False)
+    cover_image = Column(String, nullable=True)
+    created_at = Column(DateTime, default = datetime.now)
+    start_at = Column(DateTime, nullable=False)
+    end_at = Column(DateTime, nullable=False)
+    
 
 class Books(Base):
     
