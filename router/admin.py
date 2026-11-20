@@ -234,6 +234,42 @@ def update_contest(
     )
     
 
+@router.delete('/admin/delete_contest/{contest_id}')
+def delete_contest(
+    user: user_dependency,
+    db: db_dependency,
+    contest_id: int
+):
+
+    if user is None or user.get('role') != 'admin':
+        raise HTTPException(
+            status_code=401,
+            detail='Failed Authentication'
+        )
+
+    contest = db.query(Contests).filter(
+        Contests.id == contest_id
+    ).first()
+
+    if contest is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Contest not found!'
+        )
+
+    db.delete(contest)
+
+    db.commit()
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            'message': 'Contest deleted successfully!'
+        }
+    )
+
+
+
 # @router.post('/admin/create_book')
 # def create_book(user: user_dependency, db: db_dependency, new_book: BookCreate):
     
