@@ -14,6 +14,7 @@ class Users(Base):
     lastname = Column(String)
     hash_password = Column(String)
     rating = Column(Integer, default = 0)
+    max_rating = Column(Integer, default = 0)
     is_active = Column(Boolean, default = True)
     role = Column(String) # admin or developer
     phone_number = Column(String)

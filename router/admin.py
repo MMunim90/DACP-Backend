@@ -12,6 +12,26 @@ from router.auth import get_current_user
 from datetime import timedelta, datetime, timezone
 
 router = APIRouter()
+class ContestsCreate(BaseModel):
+    title: str
+    writers: str
+    category: str
+    description: str = Field(default = '', max_length=300)
+    status: str = Field(default="upcoming")
+    length: float = Field(default=0.0, ge=0)
+    start_at: datetime
+    end_at: datetime
+    
+class ContestsUpdate(BaseModel):
+    title: Optional[str] = Field(default=None)
+    writers: Optional[str] = Field(default=None)
+    category: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    status: Optional[str] = Field(default=None)
+    length: Optional[float] = Field(default=None, ge=0)
+    cover_image: Optional[str] = Field(default=None)
+    start_at: Optional[datetime] = Field(default=None)
+    end_at: Optional[datetime] = Field(default=None)
 
 class BookCreate(BaseModel):
     title: str
