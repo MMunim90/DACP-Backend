@@ -184,6 +184,56 @@ def create_contest(
         content={'message': 'Contest added successfully'})
 
 
+@router.put('/admin/update_contest/{contest_id}')
+def update_contest(
+    user: user_dependency,
+    db: db_dependency,
+    update_contest: ContestsUpdate,
+    contest_id: int
+):
+
+    if user is None or user.get('role') != 'admin':
+        raise HTTPException(
+            status_code=401,
+            detail='Failed Authentication'
+        )
+
+    contest = db.query(Contests).filter(
+        Contests.id == contest_id
+    ).first()
+
+    if contest is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Contest not found!'
+        )
+
+    update_data = update_contest.model_dump(
+        exclude_unset=True
+    )
+
+    new_start_at = update_data.get('start_at', contest.start_at)
+    new_end_at = update_data.get('end_at', contest.end_at)
+
+    if new_end_at <= new_start_at:
+        raise HTTPException(
+            status_code=400,
+            detail='Contest end time must be after start time'
+        )
+
+    for key, value in update_data.items():
+        setattr(contest, key, value)
+
+    db.commit()
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            'message': 'Contest updated successfully!'
+        }
+    )
+    
+
 # @router.post('/admin/create_book')
 # def create_book(user: user_dependency, db: db_dependency, new_book: BookCreate):
     
