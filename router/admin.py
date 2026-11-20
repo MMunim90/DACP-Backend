@@ -269,7 +269,6 @@ def delete_contest(
     )
 
 
-
 # @router.post('/admin/create_book')
 # def create_book(user: user_dependency, db: db_dependency, new_book: BookCreate):
     

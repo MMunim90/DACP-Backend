@@ -20,8 +20,6 @@ class Users(Base):
     phone_number = Column(String)
     created_at = Column(DateTime, default = datetime.now())
     
-    
-    # contest perticipate check user active or not
 class Contests(Base):
     
     __tablename__ = 'contests'

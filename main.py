@@ -3,7 +3,7 @@ from typing import Annotated, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 import models
-from models import Users, Books, Reservations, IssueRecords
+from models import Users, Books, Reservations, IssueRecords, Contests, Challenges
 from database import engine, SessionLocal
 from fastapi.responses import JSONResponse
 from router import admin, auth
@@ -39,25 +39,45 @@ db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-#get all books route
-@app.get('/books/all')
-def get_all_books(db: db_dependency):
+@app.get('/contests/all')
+def get_all_contests(db: db_dependency):
     
-    books = db.query(Books).all()
-    return books
+    contests = db.query(Contests).all()
+    return contests
 
 
-@app.get('/books/{book_id}')
-def get_specific_books(user: user_dependency, db: db_dependency, book_id: int):
+@app.get('/contests/{contest_id}')
+def get_single_contest(user: user_dependency, db: db_dependency, contest_id: int):
     
     if user is None:
         raise HTTPException(status_code=401, detail='Failed Authentication')
     
-    book = db.query(Books).filter(Books.id == book_id).first()
+    contest = db.query(Contests).filter(Contests.id == contest_id).first()
     
-    if book is None:
-        raise HTTPException(status_code=404, detail='Book not found')
-    return book
+    if contest is None:
+        raise HTTPException(status_code=404, detail='Contest not found')
+    return contest
+
+
+#get all books route
+# @app.get('/books/all')
+# def get_all_books(db: db_dependency):
+    
+#     books = db.query(Books).all()
+#     return books
+
+
+# @app.get('/books/{book_id}')
+# def get_specific_books(user: user_dependency, db: db_dependency, book_id: int):
+    
+#     if user is None:
+#         raise HTTPException(status_code=401, detail='Failed Authentication')
+    
+#     book = db.query(Books).filter(Books.id == book_id).first()
+    
+#     if book is None:
+#         raise HTTPException(status_code=404, detail='Book not found')
+#     return book
 
 
 @app.post('/reserve/{book_id}')
