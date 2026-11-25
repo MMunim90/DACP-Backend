@@ -93,27 +93,6 @@ def get_single_contest(
     return contest
 
 
-#get all books route
-# @app.get('/books/all')
-# def get_all_books(db: db_dependency):
-    
-#     books = db.query(Books).all()
-#     return books
-
-
-# @app.get('/books/{book_id}')
-# def get_specific_books(user: user_dependency, db: db_dependency, book_id: int):
-    
-#     if user is None:
-#         raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-#     book = db.query(Books).filter(Books.id == book_id).first()
-    
-#     if book is None:
-#         raise HTTPException(status_code=404, detail='Book not found')
-#     return book
-
-
 @app.post('/reserve/{book_id}')
 def reserve_book(user: user_dependency, db: db_dependency, book_id: int):
     

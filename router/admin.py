@@ -32,24 +32,6 @@ class ContestsUpdate(BaseModel):
     start_at: Optional[datetime] = Field(default=None)
     end_at: Optional[datetime] = Field(default=None)
 
-class BookCreate(BaseModel):
-    title: str
-    author: str
-    category: str
-    description: str = Field(default = '', max_length=300)
-    price: float = Field(default = 0.0, ge=0)
-    total_copies: int = Field(default = 1)
-    
-class BookUpdate(BaseModel):
-    title : Optional[str] = Field(default=None)
-    author : Optional[str] = Field(default=None)
-    category : Optional[str] = Field(default=None)
-    description : Optional[str] = Field(default=None)
-    price : Optional[float] = Field(default=None)
-    total_copies : Optional[int] = Field(default=None)
-    available_copies : Optional[int] = Field(default=None)
-    cover_image : Optional[str] = Field(default=None)
-    
 class UpdateUserRole(BaseModel):
     role : str
         
@@ -175,7 +157,6 @@ def create_contest(
 
     contest_model = Contests(**contest_data)
 
-    # Automatically calculate status.
     contest_model.status = calculate_contest_status(contest_model)
 
     db.add(contest_model)
@@ -275,61 +256,6 @@ def delete_contest(
             'message': 'Contest deleted successfully!'
         }
     )
-
-
-# @router.post('/admin/create_book')
-# def create_book(user: user_dependency, db: db_dependency, new_book: BookCreate):
-    
-#     if user is None or user.get('role') != 'librarian':
-#         raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-#     book_model = Books(
-#         **new_book.model_dump(),
-#         available_copies = new_book.total_copies
-#     )
-    
-#     db.add(book_model)
-#     db.commit()
-    
-#     return JSONResponse(status_code=201, content={'message': 'Book added successfully'})
-
-
-
-# @router.put('/admin/update_book/{book_id}')
-# def update_book(user: user_dependency, db: db_dependency, update_book: BookUpdate, book_id: int):
-    
-#     if user is None or user.get('role') != 'librarian':
-#         raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-#     book = db.query(Books).filter(Books.id == book_id).first()
-#     if book is None:
-#         raise HTTPException(status_code=404, detail='Book not found!')
-    
-#     update_data = update_book.model_dump(exclude_unset = True)
-    
-#     for key, value in update_data.items():
-#         setattr(book, key, value)
-        
-#     db.commit()
-    
-#     return JSONResponse(status_code=200, content={'message': 'Book updated successfully!'})
-
-
-# @router.delete('/admin/delete_book/{book_id}')
-# def delete_book(user: user_dependency, db: db_dependency, book_id: int):
-    
-#     if user is None or user.get('role') != 'librarian':
-#         raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-#     book = db.query(Books).filter(Books.id == book_id).first()
-#     if book is None:
-#         raise HTTPException(status_code=404, detail='Book not found!')
-    
-#     db.query(Books).filter(Books.id == book_id).delete()
-        
-#     db.commit()
-    
-#     return JSONResponse(status_code=200, content={'message': 'Book deleted successfully!'})
 
 
 @router.post('/admin/create_issue')
