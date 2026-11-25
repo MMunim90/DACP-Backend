@@ -153,6 +153,13 @@ def my_issued_books(user: user_dependency, db: db_dependency):
 def get_user_profile(user : user_dependency, db : db_dependency):
 
     if user is None:
-        raise HTTPException(status_code=401, detail="User didnot loged in yet!!!")
+        raise HTTPException(status_code=401, detail="User did not logged in yet!!!")
     
     return db.query(Users).filter(Users.id == user.get('id')).first()
+
+
+@app.get('/users/leaderboard')
+def get_leaderboard(user: user_dependency, db: db_dependency):
+    
+    users = db.query(Users).all()
+    return users
