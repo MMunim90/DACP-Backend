@@ -158,8 +158,8 @@ def get_user_profile(user : user_dependency, db : db_dependency):
     return db.query(Users).filter(Users.id == user.get('id')).first()
 
 
-@app.get('/users/leaderboard')
-def get_leaderboard(user: user_dependency, db: db_dependency):
+@app.get('/leaderboard')
+def get_leaderboard(db: db_dependency):
     
     users = db.query(Users).all()
     return users
