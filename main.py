@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from router import admin, auth
 from router.auth import get_current_user
 from fastapi.middleware.cors import CORSMiddleware
+from utils.contest_utils import calculate_contest_status
 
 app = FastAPI()
 
@@ -41,21 +42,54 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @app.get('/contests/all')
 def get_all_contests(db: db_dependency):
-    
+
     contests = db.query(Contests).all()
+
+    updated = False
+
+    for contest in contests:
+        current_status = calculate_contest_status(contest)
+
+        if contest.status != current_status:
+            contest.status = current_status
+            updated = True
+
+    if updated:
+        db.commit()
+
     return contests
 
 
 @app.get('/contests/{contest_id}')
-def get_single_contest(user: user_dependency, db: db_dependency, contest_id: int):
-    
+def get_single_contest(
+    user: user_dependency,
+    db: db_dependency,
+    contest_id: int
+):
+
     if user is None:
-        raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    contest = db.query(Contests).filter(Contests.id == contest_id).first()
-    
-    if contest is None:
-        raise HTTPException(status_code=404, detail='Contest not found')
+        raise HTTPException(
+            status_code=401,
+            detail="Failed Authentication"
+        )
+
+    contest = db.query(Contests).filter(
+        Contests.id == contest_id
+    ).first()
+
+    if not contest:
+        raise HTTPException(
+            status_code=404,
+            detail="Contest not found"
+        )
+
+    current_status = calculate_contest_status(contest)
+
+    if contest.status != current_status:
+        contest.status = current_status
+        db.commit()
+        db.refresh(contest)
+
     return contest
 
 

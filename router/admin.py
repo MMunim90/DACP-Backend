@@ -10,6 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from router.auth import get_current_user
 from datetime import timedelta, datetime, timezone
+from utils.contest_utils import calculate_contest_status
 
 router = APIRouter()
 class ContestsCreate(BaseModel):
@@ -17,7 +18,6 @@ class ContestsCreate(BaseModel):
     writers: str
     category: str
     description: str = Field(default = '', max_length=300)
-    status: str = Field(default="upcoming")
     length: float = Field(default=0.0, ge=0)
     start_at: datetime
     end_at: datetime
@@ -27,7 +27,6 @@ class ContestsUpdate(BaseModel):
     writers: Optional[str] = Field(default=None)
     category: Optional[str] = Field(default=None)
     description: Optional[str] = Field(default=None)
-    status: Optional[str] = Field(default=None)
     length: Optional[float] = Field(default=None, ge=0)
     cover_image: Optional[str] = Field(default=None)
     start_at: Optional[datetime] = Field(default=None)
@@ -172,16 +171,21 @@ def create_contest(
             detail='Contest end time must be after start time'
         )
 
-    contest_model = Contests(
-        **new_contest.model_dump()
-    )
+    contest_data = new_contest.model_dump(exclude={'status'})
+
+    contest_model = Contests(**contest_data)
+
+    # Automatically calculate status.
+    contest_model.status = calculate_contest_status(contest_model)
 
     db.add(contest_model)
     db.commit()
+    db.refresh(contest_model)
 
     return JSONResponse(
         status_code=201,
-        content={'message': 'Contest added successfully'})
+        content={'message': 'Contest added successfully'}
+    )
 
 
 @router.put('/admin/update_contest/{contest_id}')
@@ -209,7 +213,8 @@ def update_contest(
         )
 
     update_data = update_contest.model_dump(
-        exclude_unset=True
+        exclude_unset=True,
+        exclude={'status'}
     )
 
     new_start_at = update_data.get('start_at', contest.start_at)
@@ -224,7 +229,10 @@ def update_contest(
     for key, value in update_data.items():
         setattr(contest, key, value)
 
+    contest.status = calculate_contest_status(contest)
+
     db.commit()
+    db.refresh(contest)
 
     return JSONResponse(
         status_code=200,
@@ -232,7 +240,7 @@ def update_contest(
             'message': 'Contest updated successfully!'
         }
     )
-    
+
 
 @router.delete('/admin/delete_contest/{contest_id}')
 def delete_contest(
