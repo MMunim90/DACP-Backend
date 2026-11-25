@@ -18,6 +18,7 @@ class Users(Base):
     is_active = Column(Boolean, default = True)
     role = Column(String) # admin or developer
     phone_number = Column(String)
+    profile_image = Column(String, nullable=True)
     created_at = Column(DateTime, default = datetime.now())
     
 class Contests(Base):

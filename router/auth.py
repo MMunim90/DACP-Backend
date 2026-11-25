@@ -39,6 +39,7 @@ class UpdateUser(BaseModel):
     firstname : Optional[str] = Field(default=None)
     lastname : Optional[str] = Field(default=None)
     phone_number : Optional[str] = Field(default=None)
+    profile_image : Optional[str] = Field(default=None)
 
 
 class UpdatePassword(BaseModel):
