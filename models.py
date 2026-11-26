@@ -49,6 +49,7 @@ class Challenges(Base):
     description = Column(String, nullable=True)
     difficulty = Column(String(20), nullable=False, default="beginner") # beginner or intermediate or advance 
     created_at = Column(DateTime, default = datetime.now)
+    
 
 class Books(Base):
     
