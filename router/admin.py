@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from models import Users, Books, Reservations, IssueRecords, Contests, Challenges, Platform_Stat
+from models import Users, Contests, Challenges, Platform_Stat
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -43,9 +43,6 @@ class PlatformStatUpdate(BaseModel):
     developers: Optional[int] = Field(default=None, ge=0)
     contests: Optional[int] = Field(default=None, ge=0)
     submissions: Optional[int] = Field(default=None, ge=0)
-class IssueBook(BaseModel):
-    book_id: int
-    user_id: int
 
 def get_db():
     db = SessionLocal()
@@ -56,15 +53,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-FINE_PER_DAY = 30
-def calculate_fine(due_date: datetime, return_date: datetime):
-    overdue_days = (return_date.date() - due_date.date()).days
-    if overdue_days > 0:
-        return round(overdue_days*FINE_PER_DAY, 2)
-    else:
-        return 0.0
     
     
 @router.get('/admin/users/all')
@@ -131,8 +119,6 @@ def remove_user(user: user_dependency, db: db_dependency, user_id: int):
     if user is None:
         raise HTTPException(status_code=404, detail='User not found!')
     
-    db.query(Reservations).filter(Reservations.user_id == user_id).delete()
-    db.query(IssueRecords).filter(IssueRecords.user_id == user_id).delete()
     db.query(Users).filter(Users.id == user_id).delete()
         
     db.commit()
@@ -302,140 +288,3 @@ def update_platform_stat(
         }
     )
 
-
-@router.post('/admin/create_issue')
-def create_issue(user: user_dependency, db: db_dependency, issue_request: IssueBook):
-    
-    if user is None or user.get('role') != 'librarian':
-        raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    book = db.query(Books).filter(Books.id == issue_request.book_id).first()
-    
-    if book is None:
-        raise HTTPException(status_code=404, detail='Book not found!')
-    
-    member = db.query(Users).filter(Users.id == issue_request.user_id).first()
-        
-    if member is None:
-        raise HTTPException(status_code=404, detail='Member not found!')
-    
-    if book.available_copies <= 0:
-        raise HTTPException(status_code=400, detail='No copies available!')
-    
-    loan_days = 14
-    issue_date = datetime.now()
-    
-    issue_model = IssueRecords(
-        book_id = issue_request.book_id,
-        user_id = issue_request.user_id,
-        issue_date = issue_date,
-        due_date = issue_date + timedelta(days=loan_days),
-        status = 'issued'
-    )
-    
-    book.available_copies -= 1
-    
-    reservation = db.query(Reservations).filter(
-        Reservations.book_id == issue_request.book_id,
-        Reservations.user_id == issue_request.user_id,
-        Reservations.status == 'pending'
-    ).first()
-    
-    if reservation is not None:
-        reservation.status = 'approved'
-    
-    db.add(issue_model)
-    db.commit()
-    
-    return JSONResponse(status_code=201, content={'message': 'Book issued successfully'})
-
-
-
-@router.put('/admin/return_book/{issue_id}')
-def return_book(user: user_dependency, db: db_dependency, issue_id: int):
-    
-    if user is None or user.get('role') != 'librarian':
-        raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    issue = db.query(IssueRecords).filter(IssueRecords.id == issue_id).first()
-    
-    if issue is None:
-        raise HTTPException(status_code=404, detail='Issue record not found!')
-    
-    return_date = datetime.now()
-    fine = calculate_fine(issue.due_date, return_date)
-    
-    issue.return_date = return_date
-    issue.status = 'returned'
-    issue.fine_amount = fine
-    
-    book = db.query(Books).filter(Books.id == issue.book_id).first()
-    if book is not None:
-        book.available_copies += 1
-        
-    db.commit()
-    
-    return JSONResponse(status_code=200, content={'message': 'Book returned successfully', 'Fine amount': fine})
-
-
-@router.put('/admin/fine/pay/{issue_id}')
-def fine_paid(user: user_dependency, db: db_dependency, issue_id: int):
-    
-    if user is None or user.get('role') != 'librarian':
-        raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    issue = db.query(IssueRecords).filter(IssueRecords.id == issue_id).first()
-    
-    if issue is None:
-        raise HTTPException(status_code=404, detail='Issue record not found!')
-    
-    issue.fine_amount = 0.0
-    issue.fine_paid = True
-    db.commit()
-    
-    return JSONResponse(status_code=200, content={'message': 'Fine paid successfully'})
-
-
-@router.get('/admin/all_reservation')
-def all_reservation(user: user_dependency, db: db_dependency):
-    
-    if user is None or user.get('role') != 'librarian':
-            raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    reservations = db.query(Reservations).all()
-            
-    if reservations is None:
-        raise HTTPException(status_code=404, detail='No reservation found')
-        
-    return reservations
-    
-
-@router.delete('/admin/cancel_reservation/{reservation_id}')
-def reject_reservation(user: user_dependency, db: db_dependency, reservation_id: int):
-    
-    if user is None or user.get('role') != 'librarian':
-                raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    reservation = db.query(Reservations).filter(Reservations.id == reservation_id).first()
-        
-    if reservation is None:
-        raise HTTPException(status_code=404, detail='Reservation not found')
-    
-    reservation.status = 'rejected'
-    db.commit()
-    
-    return JSONResponse(status_code=201, content={'message': 'Reservation rejected successfully'})
-
-
-@router.get('/admin/all_issue')
-def all_issue(user: user_dependency, db: db_dependency):
-    
-    if user is None or user.get('role') != 'librarian':
-            raise HTTPException(status_code=401, detail='Failed Authentication')
-    
-    issues = db.query(IssueRecords).all()
-            
-    if issues is None:
-        raise HTTPException(status_code=404, detail='No issues found')
-        
-    return issues
