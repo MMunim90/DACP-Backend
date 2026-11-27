@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from models import Users, Books, Reservations, IssueRecords, Contests, Challenges
+from models import Users, Books, Reservations, IssueRecords, Contests, Challenges, Platform_Stat
 from fastapi.responses import JSONResponse
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -37,6 +37,12 @@ class UpdateUserRole(BaseModel):
         
 class UpdateUserStatus(BaseModel):
     is_active : bool
+    
+class PlatformStatUpdate(BaseModel):
+    total_problems: Optional[int] = Field(default=None, ge=0)
+    developers: Optional[int] = Field(default=None, ge=0)
+    contests: Optional[int] = Field(default=None, ge=0)
+    submissions: Optional[int] = Field(default=None, ge=0)
 class IssueBook(BaseModel):
     book_id: int
     user_id: int
@@ -254,6 +260,45 @@ def delete_contest(
         status_code=200,
         content={
             'message': 'Contest deleted successfully!'
+        }
+    )
+    
+    
+@router.put('/admin/update_platform_stat')
+def update_platform_stat(
+    user: user_dependency,
+    db: db_dependency,
+    update_platform_stat: PlatformStatUpdate):
+    
+    if user is None or user.get('role') != 'admin':
+            raise HTTPException(
+                status_code=401,
+                detail='Failed Authentication'
+            )
+    
+    platform_stat = db.query(Platform_Stat).first()
+    
+    if platform_stat is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Platform statistics not found.'
+        )
+    
+    update_data = update_platform_stat.model_dump(
+        exclude_unset=True
+    )
+
+    for key, value in update_data.items():
+        setattr(platform_stat, key, value)
+    
+    
+    db.commit()
+    db.refresh(platform_stat)
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            'message': 'Platform Statistics updated successfully!'
         }
     )
 

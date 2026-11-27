@@ -3,7 +3,7 @@ from typing import Annotated, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, ConfigDict
 import models
-from models import Users, Books, Reservations, IssueRecords, Contests, Challenges
+from models import Users, Books, Reservations, IssueRecords, Contests, Challenges, Platform_Stat
 from database import engine, SessionLocal
 from fastapi.responses import JSONResponse
 from router import admin, auth
@@ -47,6 +47,7 @@ class DeveloperPublicProfile(BaseModel):
     firstname: Optional[str] = Field(default=None)
     lastname: Optional[str] = Field(default=None)
     username: Optional[str] = Field(default=None)
+    email : Optional[str] = Field(default=None)
     profile_image: Optional[str] = Field(default=None)
     role: Optional[str] = Field(default=None)
     is_active: bool
@@ -222,3 +223,17 @@ def get_leaderboard(db: db_dependency):
     
     users = db.query(Users).all()
     return users
+
+
+@app.get('/platform_stat')
+def get_platform_stat(db: db_dependency):
+    
+    platform_stat = db.query(Platform_Stat).first()
+    
+    if platform_stat is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Platform statistics not found.'
+        )
+    
+    return platform_stat

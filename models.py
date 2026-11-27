@@ -45,11 +45,21 @@ class Challenges(Base):
     id = Column(Integer, primary_key = True, index = True)
     title = Column(String, nullable=False)
     writers = Column(String, nullable=True)
-    category = Column(String, nullable=False)
     description = Column(String, nullable=True)
+    difficulty_rating = Column(Integer, nullable=False)
     difficulty = Column(String(20), nullable=False, default="beginner") # beginner or intermediate or advance 
     created_at = Column(DateTime, default = datetime.now)
     
+
+class Platform_Stat(Base):
+    
+    __tablename__ = 'platform_stat'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    total_problems = Column(Integer, nullable=True)
+    developers = Column(Integer, nullable=True)
+    contests = Column(Integer, nullable=True)
+    submissions = Column(Integer, nullable=True)
 
 class Books(Base):
     
