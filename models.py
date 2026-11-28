@@ -15,8 +15,8 @@ class Users(Base):
     hash_password = Column(String)
     rating = Column(Integer, default = 0)
     max_rating = Column(Integer, default = 0)
-    total_contest = Column(Integer, default = 0)
-    total_problem = Column(Integer, default = 0)
+    total_contest = Column(Integer, default = 0) # total contest participate
+    total_problem = Column(Integer, default = 0) # total problem solved
     is_active = Column(Boolean, default = True)
     role = Column(String) # admin or developer
     phone_number = Column(String)
