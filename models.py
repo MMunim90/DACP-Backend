@@ -15,6 +15,8 @@ class Users(Base):
     hash_password = Column(String)
     rating = Column(Integer, default = 0)
     max_rating = Column(Integer, default = 0)
+    total_contest = Column(Integer, default = 0)
+    total_problem = Column(Integer, default = 0)
     is_active = Column(Boolean, default = True)
     role = Column(String) # admin or developer
     phone_number = Column(String)
@@ -36,6 +38,16 @@ class Contests(Base):
     created_at = Column(DateTime, default = datetime.now)
     start_at = Column(DateTime, nullable=False)
     end_at = Column(DateTime, nullable=False)
+    
+    
+class Submission(Base):
+    
+    __tablename__ = 'submission'
+    
+    id = Column(Integer, primary_key = True, index = True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    contest_id = Column(Integer, ForeignKey('contests.id'))
+    submitted_at = Column(DateTime, default = datetime.now)
     
     
 class Challenges(Base):
