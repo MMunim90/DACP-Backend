@@ -45,6 +45,9 @@ class UpdateUser(BaseModel):
 class UpdatePassword(BaseModel):
     current_password : str
     new_password : str
+    
+class CheckPassword(BaseModel):
+    current_password : str
 
 
 def authenticate_user(username, password, db):
@@ -158,3 +161,46 @@ def update_password(user : user_dependency, db : db_dependency, update_password 
     db.add(user)
     db.commit()
     return JSONResponse(status_code=200, content={'message' : 'Password updated successfully'})
+
+
+@router.delete('/remove_own_account')
+def remove_own_account(
+    user: user_dependency,
+    db: db_dependency,
+    check_password: CheckPassword
+):
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail='Failed Authentication'
+        )
+
+    user_model = db.query(Users).filter(
+        Users.id == user.get('id')
+    ).first()
+
+    if user_model is None:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found!'
+        )
+
+    # Verify the current password
+    if not bcrypt_context.verify(
+        check_password.current_password,
+        user_model.hash_password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail='Incorrect password!'
+        )
+
+    db.delete(user_model)
+    db.commit()
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            'message': 'Your account has been deleted successfully!'
+        }
+    )

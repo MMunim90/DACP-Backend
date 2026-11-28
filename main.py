@@ -3,8 +3,7 @@ from typing import Annotated, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, ConfigDict
 import models
-from models import Users, Contests, Challenges, Platform_Stat
-from passlib.context import CryptContext
+from models import Users, Contests, Challenges, Platform_Stat, Contest_Registered
 from database import engine, SessionLocal
 from fastapi.responses import JSONResponse
 from router import admin, auth
@@ -27,8 +26,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 models.Base.metadata.create_all(bind=engine)
 app.include_router(auth.router)
@@ -60,9 +57,6 @@ class DeveloperPublicProfile(BaseModel):
     created_at: Optional[datetime] = Field(default=None)
 
     model_config = ConfigDict(from_attributes=True)
-    
-class CheckPassword(BaseModel):
-    current_password : str
 
 
 @app.get('/contests/all')
@@ -177,44 +171,3 @@ def get_platform_stat(db: db_dependency):
     return platform_stat
 
 
-@app.delete('/remove_own_account')
-def remove_own_account(
-    user: user_dependency,
-    db: db_dependency,
-    check_password: CheckPassword
-):
-    if user is None:
-        raise HTTPException(
-            status_code=401,
-            detail='Failed Authentication'
-        )
-
-    user_model = db.query(Users).filter(
-        Users.id == user.get('id')
-    ).first()
-
-    if user_model is None:
-        raise HTTPException(
-            status_code=404,
-            detail='User not found!'
-        )
-
-    # Verify the current password
-    if not bcrypt_context.verify(
-        check_password.current_password,
-        user_model.hash_password
-    ):
-        raise HTTPException(
-            status_code=401,
-            detail='Incorrect password!'
-        )
-
-    db.delete(user_model)
-    db.commit()
-
-    return JSONResponse(
-        status_code=200,
-        content={
-            'message': 'Your account has been deleted successfully!'
-        }
-    )

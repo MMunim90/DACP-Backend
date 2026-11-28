@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, UniqueConstraint
 from datetime import datetime
 
 
@@ -40,15 +40,20 @@ class Contests(Base):
     end_at = Column(DateTime, nullable=False)
     
     
-class Submission(Base):
+class Contest_Registered(Base):
     
-    __tablename__ = 'submission'
-    
+    __tablename__ = 'contest_registered'
+        
     id = Column(Integer, primary_key = True, index = True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    contest_id = Column(Integer, ForeignKey('contests.id'))
-    submitted_at = Column(DateTime, default = datetime.now)
-    
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    contest_id = Column(Integer, ForeignKey('contests.id'), nullable=False)
+    ___table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "contest_id",
+            name="unique_user_contest_registration"
+        ),
+    )
     
 class Challenges(Base):
     
@@ -62,6 +67,22 @@ class Challenges(Base):
     difficulty = Column(String(20), nullable=False, default="beginner") # beginner or intermediate or advance 
     created_at = Column(DateTime, default = datetime.now)
     
+    
+class Submission(Base):
+    
+    __tablename__ = 'submission'
+    
+    id = Column(Integer, primary_key = True, index = True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    challenges_id = Column(Integer, ForeignKey('challenges.id'))
+    submitted_at = Column(DateTime, default = datetime.now)
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "challenges_id",
+            name="unique_user_challenges_perception"
+        ),
+    )
 
 class Platform_Stat(Base):
     
